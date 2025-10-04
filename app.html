@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Werkzeuglängen Rechner – v0.5.3</title>
+  <link rel="manifest" href="manifest.json?v=5">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Werkzeuglängen">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    :root{ --bg:#0b0d10; --panel:#12161b; --muted:#96a1b2; --text:#e9eef5; --accent:#6ee7ff; --accent2:#9bffd1; --warn:#ffcc66; --err:#ff5b5b;
+      --radius:16px; --gap:14px; --shadow:0 6px 24px rgba(0,0,0,.35); }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial; background:#0e1217; color:#e9eef5;}
+    .wrap{max-width:860px; margin:0 auto; padding:20px;}
+    header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px}
+    h1{font-size:1.25rem; margin:0}
+    .badge{font-size:.8rem; color:var(--bg); background:linear-gradient(90deg,var(--accent),var(--accent2)); padding:4px 10px; border-radius:999px;}
+    .grid{display:grid; grid-template-columns:1fr; gap:var(--gap)}
+    @media(min-width:740px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:linear-gradient(180deg,#141a21,#0f1318); border:1px solid #1f2630; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow)}
+    .row{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin:10px 0}
+    label{font-size:.95rem; color:#d2dae6}
+    input[type='number']{width:120px; padding:8px 10px; border-radius:10px; background:#0d1116; color:#e9eef5; border:1px solid #222a35}
+    input[type='range']{width:100%}
+    .unit{opacity:.75; font-size:.9rem}
+    .sub{font-size:.86rem; color:#96a1b2}
+    .out{display:flex; gap:12px; align-items:baseline; flex-wrap:wrap}
+    .out strong{font-size:1.6rem}
+    .chip{border:1px solid #273142; border-radius:999px; padding:6px 10px; font-size:.85rem; color:#c7d2e3}
+    .ok{color:var(--accent2)} .warn{color:var(--warn)} .err{color:var(--err)} .muted{color:var(--muted)}
+    .spread{display:flex; justify-content:space-between; align-items:center; gap:10px}
+    .footer{margin-top:16px; font-size:.85rem; color:var(--muted)}
+    svg{width:100%; height:auto; background:#0e1319; border:1px solid #1e2631; border-radius:12px}
+    .ax{stroke:#2a3442; stroke-width:1}
+    .dim{stroke:var(--accent); fill:none; stroke-width:2; marker-end:url(#arrow);}
+    .dim2{stroke:var(--accent2); fill:none; stroke-width:2; marker-end:url(#arrow2);}
+    .dimBad{stroke:var(--err)!important}
+    .label{fill:#cfe6ff; font-size:11px}
+    .label2{fill:#bfffe2; font-size:11px}
+    .block{fill:#1b2430; stroke:#2b3a4a}
+    .under{fill:#2a3646; stroke:#415066; stroke-dasharray:4 3}
+    .spindle{stroke:#6ee7ff; stroke-width:3}
+    .icon{fill:#6ee7ff}
+    .warnOverlay{stroke:var(--err); stroke-width:5; stroke-linecap:round; opacity:.85}
+    #iconFraser *{stroke:#6ee7ff !important; fill:none !important; stroke-width:2; vector-effect:non-scaling-stroke;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Werkzeuglängen Rechner</h1>
+      <span class="badge">v0.5.3</span>
+    </header>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="inputsTitle">
+        <h2 id="inputsTitle" style="margin:0 0 8px 0; font-size:1.1rem;">Eingaben</h2>
+        <p class="sub">Werte werden automatisch gespeichert.</p>
+
+        <div class="row">
+          <label for="C">Freiraum <span class="muted">C</span></label>
+          <div class="spread"><input id="C" type="number" min="0" max="400" step="1" inputmode="decimal"> <span class="unit">mm</span></div>
+        </div>
+        <div class="row">
+          <label for="hub">Hub Z <span class="muted">(Hub)</span></label>
+          <div class="spread"><input id="hub" type="number" min="0" max="400" step="1" inputmode="decimal"> <span class="unit">mm</span></div>
+        </div>
+        <hr style="border:none; border-top:1px solid #1e2631; margin:10px 0">
+        <div class="row">
+          <label for="H">Werkstückhöhe <span class="muted">H</span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="H" type="range" min="0" max="60" step="0.5" value="0" style="flex:1"> 
+            <input id="Hn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="hf">Freifahrhöhe <span class="muted">h<sub>f</sub></span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="hf" type="range" min="0" max="60" step="0.5" value="0" style="flex:1">
+            <input id="hfn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="d">Frästiefe <span class="muted">d</span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="d" type="range" min="0" max="60" step="0.5" value="0" style="flex:1">
+            <input id="dn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #1e2631; margin:10px 0">
+
+        <div class="row">
+          <label for="S">Schaftlänge <span class="muted">S</span> <span class="sub">(2/3‑Regel)</span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="S" type="range" min="0" max="120" step="0.5" value="0" style="flex:1">
+            <input id="Sn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="outTitle">
+        <h2 id="outTitle" style="margin:0 0 8px 0; font-size:1.1rem;">Ergebnisse</h2>
+        <div class="out" style="margin-bottom:10px">
+          <div><div class="muted">L<sub>max</sub></div><strong id="Lmax">–</strong> <span class="unit">mm</span></div>
+          <div><div class="muted">L<sub>min</sub></div><strong id="Lmin">–</strong> <span class="unit">mm</span></div>
+        </div>
+        <div class="chip" id="rangeChip">Werkzeug (Maschine): – bis – mm</div>
+        <div class="chip" id="ruleChip" style="margin-top:8px">2/3‑Regel: L ≤ – mm (S/3)</div>
+        <div class="chip" id="supportChip" style="margin-top:8px; display:none">Unterbau: B ≥ – mm (max. – mm)</div>
+        <div id="notes" class="sub" style="margin-top:10px"></div>
+        <hr style="border:none; border-top:1px solid #1e2631; margin:12px 0">
+        <div class="sub">Formeln: L<sub>max</sub> = C − H − h<sub>f</sub> • L<sub>min</sub> = max(0, C − Hub − H + d) • 2/3‑Regel: L ≤ S/3 • Unterbau: B<sub>min</sub>=max(0, C−Hub−H+d−S/3), B<sub>max</sub>=C−H−h<sub>f</sub></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:14px" aria-labelledby="sketchTitle">
+      <h3 id="sketchTitle" style="margin:0 0 8px 0; font-size:1rem;">Symbolische Skizze</h3>
+      <svg viewBox="0 0 400 240" id="sketch" role="img" aria-label="Symbolische Darstellung der Parameter">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6ee7ff"/>
+          </marker>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#9bffd1"/>
+          </marker>
+          <symbol id="fraserSymbol" viewBox="0 0 512 512">
+            <g id="iconFraser">
+              <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   sodipodi:docname="Fräser 2.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="2.8970539"
+     inkscape:cx="35.55336"
+     inkscape:cy="192.78206"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" /><defs
+     id="defs1"><inkscape:path-effect
+       effect="spiro"
+       id="path-effect4"
+       is_visible="true"
+       lpeversion="1" /><inkscape:path-effect
+       effect="spiro"
+       id="path-effect3"
+       is_visible="true"
+       lpeversion="1" /><inkscape:path-effect
+       effect="spiro"
+       id="path-effect2"
+       is_visible="true"
+       lpeversion="1" /></defs><g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"><path
+       style="fill:#000000;stroke-width:1"
+       d="m 19.86394,86.231672 c 0,0 -0.08705,-9.782891 0.0084,-9.969395 0.04851,-0.0946 2.228282,-0.150852 5.840777,-0.150852 l 6.521233,-0.04609 0.222913,5.760056 15.241933,0.07726 -0.04799,4.333514 v 0 c -9.208823,0.002 -27.787615,-0.004 -27.787615,-0.004 z m 0,0 c -34.370844,-171.954853 -34.370844,-171.954853 0,0 z m 27.103663,-2.205582 0.0377,-1.119634 h -7.610414 c -5.748233,0 -7.64808,-0.04539 -7.764314,-0.185315 -0.107823,-0.129853 -0.15389,-0.984939 -0.15389,-2.857007 v -2.671683 h -5.450324 -5.450324 v 3.912295 c 0,2.151754 0.03875,3.958941 0.08611,4.015966 0.04736,0.05709 5.976984,0.08603 13.176961,0.06435 l 13.090865,-0.03933 z"
+       id="path1-5"
+       inkscape:export-filename="Fräser.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"
+       sodipodi:nodetypes="ssscccccssccccssscccssscc" /><path
+       style="fill:#000000;stroke-width:1"
+       d="m 11.648386,91.921623 c -0.165226,-0.19073 -0.05645,-3.40151 -0.05645,-3.40151 l 47.94025,0.0733 v 3.38568 l -23.882263,0.0401 c -13.464021,0.0226 -23.934303,-0.02 -24.00155,-0.0976 z m 46.627203,-1.6353 -0.06778,-0.66928 h -22.6267 -22.626602 l -0.06789,0.66928 -0.06789,0.66925 h 22.762361 22.76237 z m -22.601661,-1.73148 c -118.82534,-175.963874 -118.82534,-175.963874 0,0 z"
+       id="path1-5-0"
+       inkscape:export-filename="Fräser.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"
+       sodipodi:nodetypes="scccsssccccccccccc" /><path
+       style="fill:#000000;stroke-width:1"
+       d="m 31.92569,72.901172 -0.114161,-8.94638 v -3.21553 h -1.746406 c -1.195479,0 -1.792635,-0.058 -1.892955,-0.18374 -0.189372,-0.23743 -0.207602,-6.73689 -0.02013,-7.17608 0.09893,-0.23177 0.258282,-0.29618 0.732756,-0.29618 h 0.606334 v -1.30152 -1.30153 h -0.789523 c -1.051402,0 -1.069389,-0.0502 -1.035527,-2.88434 0.01475,-1.23485 0.01925,-3.33042 0.01,-4.65683 l -0.01684,-2.41163 h -2.601286 c -1.860388,0 -2.643027,-0.0523 -2.747838,-0.18375 -0.105916,-0.1328 -0.146551,-1.21197 -0.146551,-3.89204 0,-2.03956 0.03336,-3.81729 0.07413,-3.9505 0.06686,-0.21846 1.190833,-0.2422 11.466786,-0.2422 10.27596,0 11.39993,0.0237 11.46679,0.2422 0.0407,0.13321 0.0741,1.91094 0.0741,3.9505 0,2.68007 -0.0406,3.75924 -0.14655,3.89204 -0.10502,0.13167 -0.90064,0.18375 -2.80721,0.18375 h -2.66065 l -0.0322,4.93812 -0.0322,4.93812 -0.82436,0.0453 -0.82435,0.0453 v 1.28652 1.28652 l 0.64117,0.0463 0.64115,0.0463 v 3.75144 3.75145 l -1.80135,0.0423 -1.80136,0.0423 v 6.04267 6.04266 l -0.85513,0.003 z m 2.084099,4.29851 -10e-6,1.30152 z m 0.73254,-5.66544 c 0.405168,-0.59014 -0.04,-1.30153 -0.0889,-1.30153 -0.11985,0 -1.98725,2.33476 -1.98725,2.48461 z m 0,-4.20405 v -1.30151 l -1.03807,1.29475 -1.03807,1.29476 v 1.30153 1.30152 l 1.03807,-1.29477 1.03807,-1.29476 z m -0.94917,-1.49609 0.94917,-1.18308 v -1.30174 -1.30174 l -1.03807,1.29477 -1.03807,1.29476 v 1.19007 c 0,0.65453 0.04,1.19005 0.0889,1.19005 0.0489,0 0.51602,-0.53239 1.03807,-1.18309 z m -0.39709,-3.5317 c 0.33744,-0.40352 0.61351,-0.78249 0.61351,-0.84216 0,-0.0596 -0.30226,-0.10849 -0.67169,-0.10849 h -0.6717 v 0.84215 c 0,0.46319 0.0262,0.84217 0.0582,0.84217 0.0319,0 0.33427,-0.33015 0.67169,-0.73367 z m -2.657227,-4.41778 c 0.02947,-1.52687 0.06612,-1.80714 0.255278,-1.95229 0.363822,-0.27915 0.592759,0.2709 0.566759,1.36173 -0.0121,0.50529 -0.0156,1.24602 -0.008,1.64604 l 0.014,0.72732 h 0.85488 0.85488 v -1.74213 c 0,-1.40275 0.0377,-1.78135 0.19343,-1.9434 0.14019,-0.14588 0.24943,-0.15707 0.39691,-0.0406 0.16736,0.13208 0.20959,0.47712 0.23789,1.9434 l 0.0344,1.7828 h 0.851 0.85101 v -1.65505 c 0,-1.83861 0.15486,-2.40082 0.57295,-2.08004 0.18916,0.14515 0.22581,0.42543 0.25528,1.95229 l 0.0344,1.7828 h 0.91208 0.91207 v -2.75616 -2.75616 h -4.82394 -4.823975 v 2.75616 2.75616 h 0.912071 0.91207 z m 6.323897,-6.42454 v -0.97987 h -3.35847 -3.358461 v 0.99246 0.99246 l 2.830061,0.041 c 1.55654,0.0226 3.06785,0.0169 3.35847,-0.0126 l 0.5284,-0.0537 z m 1.70977,-6.49219 v -4.44048 h -5.12929 -5.129303 v 4.44048 4.44048 h 5.129303 5.12929 z m 5.6178,-8.57473 v -3.0624 H 33.704469 23.01844 v 3.0624 3.0624 h 10.686029 10.68604 z"
+       id="path1-2"
+       inkscape:export-filename="Fräser.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"
+       sodipodi:nodetypes="cccsssscccssscssssssssscccccccccccccccccccccscccccccccccscccccssssssscsssccssccccsscscccsssccccccccccccccccccccccccccccccccccccccc" /><path
+       style="fill:#ff0000;fill-opacity:1;stroke:#f10000;stroke-width:0.565;stroke-linecap:round;stroke-miterlimit:1.9;stroke-dasharray:2.26, 1.13, 0.565, 1.13;stroke-dashoffset:0.452;stroke-opacity:1"
+       d="M 21.737215,266.87523 V 255.54435"
+       id="path2"
+       inkscape:path-effect="#path-effect2"
+       inkscape:original-d="m 21.737215,266.87523 c 0,-3.77696 0,-7.55392 0,-11.33088"
+       transform="translate(10.074314,-206.13598)" /><path
+       style="fill:#ff0000;fill-opacity:1;stroke:#f10000;stroke-width:0.565;stroke-linecap:round;stroke-miterlimit:1.9;stroke-dasharray:2.26, 1.13, 0.565, 1.13;stroke-dashoffset:0.452;stroke-opacity:1"
+       d="m 25.523145,266.88335 v -11.339"
+       id="path3"
+       inkscape:path-effect="#path-effect3"
+       inkscape:original-d="m 25.523145,266.88335 c 0,-3.77966 0,-7.55933 0,-11.339"
+       transform="translate(10.074314,-206.13598)" /><path
+       style="fill:#ff0000;fill-opacity:1;stroke:#f10000;stroke-width:0.565;stroke-linecap:round;stroke-miterlimit:1.9;stroke-dasharray:2.26, 1.13, 0.565, 1.13;stroke-dashoffset:0.452;stroke-opacity:1"
+       d="m 21.737215,255.54435 h 3.78593"
+       id="path4"
+       inkscape:path-effect="#path-effect4"
+       inkscape:original-d="m 21.737215,255.54435 c 1.261976,0 2.523953,0 3.78593,0"
+       transform="translate(10.074314,-206.13598)" /><rect
+       style="fill:none;fill-rule:evenodd;stroke-width:1.765;stroke-dasharray:none"
+       id="rect7"
+       width="62.593384"
+       height="3.2245095"
+       x="2.172092"
+       y="86.277328"
+       ry="1"
+       rx="1" /><rect
+       style="fill:none;fill-opacity:1;stroke:#0c0004;stroke-width:0.765;stroke-linecap:round;stroke-miterlimit:1.9;stroke-dasharray:3.05999994, 1.52999997, 0.76499999, 1.52999997;stroke-dashoffset:0.38249999;stroke-opacity:1"
+       id="rect8"
+       width="32.805214"
+       height="2.2427845"
+       x="17.238529"
+       y="86.277328"
+       rx="0.99999994"
+       ry="1" /></g></svg>
+
+            </g>
+          </symbol>
+        </defs>
+
+        <line x1="20" y1="220" x2="380" y2="220" class="ax"/>
+        <text x="22" y="236" class="label">Tisch</text>
+
+        <use id="fraser" href="#fraserSymbol" x="40" y="40" width="64" height="64"></use>
+        <line id="spindle" x1="60" y1="70" x2="140" y2="70" class="spindle"/>
+        <text id="tSp" x="146" y="64" class="label">Spindel‑U</text>
+
+        <rect id="underbuild" x="170" y="220" width="110" height="0" class="under"/>
+        <rect id="wp" x="170" y="180" width="110" height="40" class="block"/>
+
+        <rect id="hfzone" x="170" y="140" width="110" height="40" fill="none" stroke="#44556b" stroke-dasharray="4 3"/>
+        <text x="288" y="158" class="label">h₍f₎</text>
+
+        <line id="depth" x1="285" y1="180" x2="315" y2="180" class="dim2"/>
+        <text id="td" x="320" y="184" class="label2">d</text>
+
+        <line id="dimHub" x1="100" y1="70" x2="100" y2="70" class="dim2"/>
+        <text id="tHub" x="106" y="70" class="label2">Hub</text>
+
+        <line id="dimLmax" x1="120" y1="70" x2="120" y2="70" class="dim"/>
+        <text id="tLmax" x="126" y="70" class="label">Lmax</text>
+
+        <line id="dimLmin" x1="140" y1="70" x2="140" y2="70" class="dim2"/>
+        <text id="tLmin" x="146" y="70" class="label2">Lmin</text>
+
+        <line id="CLine" x1="40" y1="220" x2="40" y2="220" class="dim"/>
+        <text id="tC" x="46" y="220" class="label">C</text>
+
+        <g id="warnX" style="display:none">
+          <line x1="30" y1="30" x2="370" y2="200" class="warnOverlay"/>
+          <line x1="370" y1="30" x2="30" y2="200" class="warnOverlay"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <div class="footer">Made for mobile • v0.5.3</div>
+    </section>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {{ navigator.serviceWorker.register('/werkzeuglaengen-app/service-worker.js'); }}
+
+    const $ = id => document.getElementById(id);
+    const C = $("C"), hub = $("hub");
+    const H = $("H"), Hn = $("Hn");
+    const hf = $("hf"), hfn = $("hfn");
+    const d = $("d"), dn = $("dn");
+    const S = $("S"), Sn = $("Sn");
+    const Lmax = $("Lmax"), Lmin = $("Lmin"), notes = $("notes"), rangeChip = $("rangeChip"), ruleChip = $("ruleChip"), supportChip = $("supportChip");
+    const warnX = $("warnX");
+
+    const keys = {{C:'wl_C', Hub:'wl_Hub', H:'wl_H', hf:'wl_hf', d:'wl_d', S:'wl_S'}};
+    const defaults = {{C:60, Hub:20, H:35, hf:5, d:2, S:45}};
+
+    const lastSrc = {{ H: 'num', hf: 'num', d: 'num', S: 'num' }};
+    function pickPair(rangeEl, numEl, key){{ return (lastSrc[key]==='range' ? (+rangeEl.value||0) : (+numEl.value||0)); }}
+    function syncPair(rangeEl, numEl, val){{ rangeEl.value = val; numEl.value = val; }}
+
+    function clamp(v, lo, hi){{ return Math.max(lo, Math.min(hi, v)); }}
+    function loadNum(key, def){{ const x = localStorage.getItem(key); const n = x===null?NaN:+x; return isFinite(n) ? n : def; }}
+    function saveAll(vals){{ for(const [k,v] of Object.entries(vals)) localStorage.setItem(k, v); }}
+
+    function recalc(){{
+      const Cv = +C.value || 0;
+      const Hubv = +hub.value || 0;
+      const Hv = clamp(pickPair(H, Hn, 'H'), 0, 1000);
+      const hfv = clamp(pickPair(hf, hfn, 'hf'), 0, 1000);
+      const dv = clamp(pickPair(d, dn, 'd'), 0, 1000);
+      const Sv = clamp(pickPair(S, Sn, 'S'), 0, 1000);
+
+      syncPair(H, Hn, Hv);
+      syncPair(hf, hfn, hfv);
+      syncPair(d, dn, dv);
+      syncPair(S, Sn, Sv);
+
+      saveAll({{[keys.C]:Cv, [keys.Hub]:Hubv, [keys.H]:Hv, [keys.hf]:hfv, [keys.d]:dv, [keys.S]:Sv}});
+
+      const Lmaxv = Cv - Hv - hfv;
+      const Lminv = Math.max(0, Cv - Hubv - Hv + dv);
+      const LsafeMax = Sv / 3;
+      const safeUpper = Math.min(Lmaxv, LsafeMax);
+
+      const Bmin = Math.max(0, Cv - Hubv - Hv + dv - LsafeMax);
+      const Bmax = Math.max(0, Cv - Hv - hfv);
+      const showB = (Lminv > LsafeMax) && (Bmin > 0);
+      const Bdisp = Math.min(Bmin, Bmax);
+
+      const fmt = v => (isFinite(v) ? v.toFixed(1).replace(/\.0$/,'') : '–');
+      Lmax.textContent = fmt(Lmaxv);
+      Lmin.textContent = fmt(Lminv);
+      rangeChip.textContent = `Werkzeug (Maschine): ${fmt(Lminv)} – ${fmt(Lmaxv)} mm`;
+      ruleChip.textContent = `2/3‑Regel: L ≤ ${fmt(LsafeMax)} mm (S/3)`;
+
+      if (showB) {{
+        supportChip.style.display = 'inline-block';
+        supportChip.textContent = (Bmin <= Bmax)
+          ? `Unterbau: B ≥ ${fmt(Bmin)} mm (max. ${fmt(Bmax)} mm)`
+          : `Unterbau reicht nicht: nötig B ≥ ${fmt(Bmin)} mm, möglich max. ${fmt(Bmax)} mm`;
+      }} else {{
+        supportChip.style.display = 'none';
+      }}
+
+      let msg = [];
+      const invalidMachine = (Lminv > Lmaxv) || (Lmaxv < 0);
+      const violatesRule = (Lminv > LsafeMax);
+      if (invalidMachine) {{
+        if (Lmaxv < 0) msg.push('⚠︎ Lmax < 0 → kein Freiraum');
+        if (Lminv > Lmaxv) msg.push('❌ Lmin > Lmax → nicht fahrbar (Maschinenlimit)');
+      }} else if (violatesRule) {{
+        msg.push('❌ 2/3‑Regel verletzt → zu wenig Einspannlänge');
+        msg.push(`Vorschlag: Unterbau B ≥ ${fmt(Bmin)} mm (max ${fmt(Bmax)} mm)`);
+      }} else {{
+        msg.push(`✅ Sicherer Bereich: ${fmt(Lminv)} – ${fmt(safeUpper)} mm`);
+      }}
+      notes.innerHTML = msg.join(' &nbsp;•&nbsp; ');
+
+      const yTable = 220, topPad = 24, usable = yTable - topPad;
+      const ref = Math.max(Cv, Hubv, Hv + hfv + dv, Sv, Bdisp) + 5;
+      const pxPerMm = usable / Math.max(ref, 1);
+      const yOf = mm => yTable - mm * pxPerMm;
+
+      const ySp = yOf(Cv);
+      const sp = document.getElementById('spindle');
+      sp.setAttribute('x1', 60); sp.setAttribute('x2', 140);
+      sp.setAttribute('y1', ySp); sp.setAttribute('y2', ySp);
+      document.getElementById('tSp').setAttribute('x', 146);
+      document.getElementById('tSp').setAttribute('y', ySp - 6);
+
+      const icon = document.getElementById('fraser');
+      icon.setAttribute('x', 40);
+      icon.setAttribute('y', ySp - 28);
+      icon.setAttribute('width', 44);
+      icon.setAttribute('height', 44);
+
+      const yWpTop = yOf(Hv + (showB ? Bdisp : 0));
+      setRect('wp', 170, yWpTop, 110, yTable - yWpTop - (showB ? (Bdisp*pxPerMm) : 0));
+
+      const underH = showB ? (Bdisp * pxPerMm) : 0;
+      setRect('underbuild', 170, yTable - underH, 110, underH);
+
+      const yHfTop = yOf(Hv + hfv + (showB ? Bdisp : 0));
+      setRect('hfzone', 170, yHfTop, 110, Math.max(0, yWpTop - yHfTop));
+
+      const yDepth = yOf(Math.max(Hv - dv + (showB ? Bdisp : 0), 0));
+      setLine('depth', 285, yDepth, 315, yDepth);
+      setText('td', 320, yDepth + 4);
+
+      setLine('CLine', 40, yTable, 40, ySp);
+      setText('tC', 46, (yTable + ySp)/2 + 4);
+
+      const yHubTop = yOf(Math.max(Cv - Hubv, 0));
+      setLine('dimHub', 100, ySp, 100, yHubTop);
+      setText('tHub', 106, (ySp + yHubTop)/2 + 4);
+
+      const yLmaxEnd = yOf(Math.max(Cv - Lmaxv, 0));
+      setLine('dimLmax', 120, ySp, 120, yLmaxEnd);
+      setText('tLmax', 126, (ySp + yLmaxEnd)/2 + 4);
+
+      const yLminEnd = yOf(Math.max(Cv - Lminv, 0));
+      setLine('dimLmin', 140, ySp, 140, yLminEnd);
+      setText('tLmin', 146, (ySp + yLminEnd)/2 + 4);
+
+      const invalid = invalidMachine || violatesRule;
+      document.getElementById('warnX').style.display = invalid ? 'block' : 'none';
+      const Ls = ['dimLmax','dimLmin','dimHub','CLine'];
+      Ls.forEach(id => document.getElementById(id).setAttribute('class', (id==='dimLmin'?'dim2':'dim') + (invalid?' dimBad':'')));
+    }}
+
+    function setLine(id,x1,y1,x2,y2){ const el=document.getElementById(id); el.setAttribute('x1',x1); el.setAttribute('y1',y1); el.setAttribute('x2',x2); el.setAttribute('y2',y2); }
+    function setRect(id,x,y,w,h){ const el=document.getElementById(id); el.setAttribute('x',x); el.setAttribute('y',y); el.setAttribute('width',w); el.setAttribute('height',Math.max(0,h)); }
+    function setText(id,x,y){ const el=document.getElementById(id); el.setAttribute('x',x); el.setAttribute('y',y); }
+
+    (function init(){
+      const vals = {
+        [keys.C]: loadNum(keys.C, defaults.C),
+        [keys.Hub]: loadNum(keys.Hub, defaults.Hub),
+        [keys.H]: loadNum(keys.H, defaults.H),
+        [keys.hf]: loadNum(keys.hf, defaults.hf),
+        [keys.d]: loadNum(keys.d, defaults.d),
+        [keys.S]: loadNum(keys.S, defaults.S)
+      };
+      C.value = vals[keys.C]; hub.value = vals[keys.Hub];
+      H.value = vals[keys.H]; Hn.value = vals[keys.H];
+      hf.value = vals[keys.hf]; hfn.value = vals[keys.hf];
+      d.value = vals[keys.d]; dn.value = vals[keys.d];
+      S.value = vals[keys.S]; Sn.value = vals[keys.S];
+      recalc();
+    })();
+
+    [C, hub, H, Hn, hf, hfn, d, dn, S, Sn].forEach(el => {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+    H.addEventListener('input', ()=>{ lastSrc.H='range'; });
+    Hn.addEventListener('input', ()=>{ lastSrc.H='num'; });
+    hf.addEventListener('input', ()=>{ lastSrc.hf='range'; });
+    hfn.addEventListener('input', ()=>{ lastSrc.hf='num'; });
+    d.addEventListener('input', ()=>{ lastSrc.d='range'; });
+    dn.addEventListener('input', ()=>{ lastSrc.d='num'; });
+    S.addEventListener('input', ()=>{ lastSrc.S='range'; });
+    Sn.addEventListener('input', ()=>{ lastSrc.S='num'; });
+  </script>
+</body>
+</html>
