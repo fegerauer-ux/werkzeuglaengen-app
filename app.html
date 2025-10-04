@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Werkzeuglängen Rechner – v0.5</title>
+  <link rel="manifest" href="manifest.json?v=5">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Werkzeuglängen">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    :root{ --bg:#0b0d10; --panel:#12161b; --muted:#96a1b2; --text:#e9eef5; --accent:#6ee7ff; --accent2:#9bffd1; --warn:#ffcc66; --err:#ff5b5b;
+      --radius:16px; --gap:14px; --shadow:0 6px 24px rgba(0,0,0,.35); }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial; background:var(--bg); color:var(--text);}
+    .wrap{max-width:860px; margin:0 auto; padding:20px;}
+    header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px}
+    h1{font-size:1.25rem; margin:0}
+    .badge{font-size:.8rem; color:var(--bg); background:linear-gradient(90deg,var(--accent),var(--accent2)); padding:4px 10px; border-radius:999px;}
+    .grid{display:grid; grid-template-columns:1fr; gap:var(--gap)}
+    @media(min-width:740px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:linear-gradient(180deg,#141a21,#0f1318); border:1px solid #1f2630; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow)}
+    .row{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin:10px 0}
+    label{font-size:.95rem; color:#d2dae6}
+    input[type='number']{width:120px; padding:8px 10px; border-radius:10px; background:#0d1116; color:#e9eef5; border:1px solid #222a35}
+    input[type='range']{width:100%}
+    .unit{opacity:.75; font-size:.9rem}
+    .sub{font-size:.86rem; color:#96a1b2}
+    .out{display:flex; gap:12px; align-items:baseline; flex-wrap:wrap}
+    .out strong{font-size:1.6rem}
+    .chip{border:1px solid #273142; border-radius:999px; padding:6px 10px; font-size:.85rem; color:#c7d2e3}
+    .ok{color:var(--accent2)} .warn{color:var(--warn)} .err{color:var(--err)} .muted{color:var(--muted)}
+    .spread{display:flex; justify-content:space-between; align-items:center; gap:10px}
+    .footer{margin-top:16px; font-size:.85rem; color:var(--muted)}
+    svg{width:100%; height:auto; background:#0e1319; border:1px solid #1e2631; border-radius:12px}
+    .ax{stroke:#2a3442; stroke-width:1}
+    .dim{stroke:var(--accent); fill:none; stroke-width:2}
+    .dim2{stroke:var(--accent2); fill:none; stroke-width:2}
+    .dimBad{stroke:var(--err)!important}
+    .label{fill:#cfe6ff; font-size:11px}
+    .label2{fill:#bfffe2; font-size:11px}
+    .block{fill:#1b2430; stroke:#2b3a4a}
+    .spindle{stroke:#6ee7ff; stroke-width:3}
+    .icon{fill:#6ee7ff}
+    .warnOverlay{stroke:var(--err); stroke-width:5; stroke-linecap:round; opacity:.85}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Werkzeuglängen Rechner</h1>
+      <span class="badge">v0.5</span>
+    </header>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="inputsTitle">
+        <h2 id="inputsTitle" style="margin:0 0 8px 0; font-size:1.1rem;">Eingaben</h2>
+        <p class="sub">Werte werden automatisch gespeichert.</p>
+
+        <div class="row">
+          <label for="C">Freiraum <span class="muted">C</span></label>
+          <div class="spread"><input id="C" type="number" min="0" max="400" step="1" inputmode="decimal"> <span class="unit">mm</span></div>
+        </div>
+        <div class="row">
+          <label for="hub">Hub Z <span class="muted">(Hub)</span></label>
+          <div class="spread"><input id="hub" type="number" min="0" max="400" step="1" inputmode="decimal"> <span class="unit">mm</span></div>
+        </div>
+        <hr style="border:none; border-top:1px solid #1e2631; margin:10px 0">
+        <div class="row">
+          <label for="H">Werkstückhöhe <span class="muted">H</span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="H" type="range" min="0" max="60" step="0.5" value="0" style="flex:1"> 
+            <input id="Hn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="hf">Freifahrhöhe <span class="muted">h<sub>f</sub></span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="hf" type="range" min="0" max="60" step="0.5" value="0" style="flex:1">
+            <input id="hfn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="d">Frästiefe <span class="muted">d</span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="d" type="range" min="0" max="60" step="0.5" value="0" style="flex:1">
+            <input id="dn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #1e2631; margin:10px 0">
+
+        <div class="row">
+          <label for="S">Schaftlänge <span class="muted">S</span> <span class="sub">(2/3‑Regel)</span></label>
+          <div class="spread" style="flex:1 1 auto; gap:10px">
+            <input id="S" type="range" min="0" max="120" step="0.5" value="0" style="flex:1">
+            <input id="Sn" type="number" min="0" max="400" step="0.5" value="0" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="outTitle">
+        <h2 id="outTitle" style="margin:0 0 8px 0; font-size:1.1rem;">Ergebnisse</h2>
+        <div class="out" style="margin-bottom:10px">
+          <div><div class="muted">L<sub>max</sub></div><strong id="Lmax">–</strong> <span class="unit">mm</span></div>
+          <div><div class="muted">L<sub>min</sub></div><strong id="Lmin">–</strong> <span class="unit">mm</span></div>
+        </div>
+        <div class="chip" id="rangeChip">Werkzeug: – bis – mm</div>
+        <div class="chip" id="ruleChip" style="margin-top:8px">2/3‑Regel: L ≤ – mm (S/3)</div>
+        <div id="notes" class="sub" style="margin-top:10px"></div>
+        <hr style="border:none; border-top:1px solid #1e2631; margin:12px 0">
+        <div class="sub">Formeln: L<sub>max</sub> = C − H − h<sub>f</sub> • L<sub>min</sub> = max(0, C − Hub − H + d) • 2/3‑Regel: L ≤ S/3</div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:14px" aria-labelledby="sketchTitle">
+      <h3 id="sketchTitle" style="margin:0 0 8px 0; font-size:1rem;">Symbolische Skizze</h3>
+      <svg viewBox="0 0 360 220" id="sketch" role="img" aria-label="Symbolische Darstellung der Parameter">
+        <line x1="20" y1="200" x2="340" y2="200" class="ax"/>
+        <text x="22" y="214" class="label">Tisch</text>
+        <circle id="spindleIcon" cx="70" cy="40" r="6" class="icon"/>
+        <line id="spindle" x1="50" y1="40" x2="90" y2="40" class="spindle"/>
+        <rect id="wp" x="140" y="160" width="90" height="40" class="block"/>
+        <rect id="hfzone" x="140" y="120" width="90" height="40" fill="none" stroke="#44556b" stroke-dasharray="4 3"/>
+        <text x="234" y="138" class="label">h₍f₎</text>
+        <line id="depth" x1="235" y1="160" x2="265" y2="160" stroke="#9bffd1" stroke-width="3"/>
+        <text id="td" x="270" y="164" class="label2">d</text>
+        <line id="LmaxLine" x1="320" y1="160" x2="320" y2="160" class="dim"/>
+        <text id="tLmax" x="326" y="160" class="label">Lmax</text>
+        <line id="LminLine" x1="330" y1="160" x2="330" y2="160" class="dim2"/>
+        <text id="tLmin" x="336" y="160" class="label2">Lmin</text>
+        <line id="hubLine" x1="80" y1="60" x2="80" y2="60" class="dim2"/>
+        <text id="tHub" x="86" y="60" class="label2">Hub</text>
+        <line id="CLine" x1="100" y1="60" x2="100" y2="60" class="dim"/>
+        <text id="tC" x="106" y="60" class="label">C</text>
+        <g id="warnX" style="display:none">
+          <line x1="30" y1="30" x2="330" y2="190" class="warnOverlay"/>
+          <line x1="330" y1="30" x2="30" y2="190" class="warnOverlay"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <div class="footer">Made for mobile • v0.5</div>
+    </section>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/werkzeuglaengen-app/service-worker.js'); }
+
+    const $ = id => document.getElementById(id);
+    const C = $("C"), hub = $("hub");
+    const H = $("H"), Hn = $("Hn");
+    const hf = $("hf"), hfn = $("hfn");
+    const d = $("d"), dn = $("dn");
+    const S = $("S"), Sn = $("Sn");
+    const Lmax = $("Lmax"), Lmin = $("Lmin"), notes = $("notes"), rangeChip = $("rangeChip"), ruleChip = $("ruleChip");
+    const warnX = $("warnX");
+
+    const keys = {C:'wl_C', Hub:'wl_Hub', H:'wl_H', hf:'wl_hf', d:'wl_d', S:'wl_S'};
+    const defaults = {C:60, Hub:20, H:35, hf:5, d:2, S:45};
+
+    function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+    function loadNum(key, def){ const x = localStorage.getItem(key); const n = x===null?NaN:+x; return isFinite(n) ? n : def; }
+    function saveAll(vals){ for(const [k,v] of Object.entries(vals)) localStorage.setItem(k, v); }
+
+    function syncPair(rangeEl, numEl, val){
+      rangeEl.value = val; numEl.value = val;
+    }
+
+    function recalc(){
+      const Cv = +C.value || 0;
+      const Hubv = +hub.value || 0;
+      const Hv = clamp(+Hn.value || +H.value || 0, 0, 1000);
+      const hfv = clamp(+hfn.value || +hf.value || 0, 0, 1000);
+      const dv = clamp(+dn.value || +d.value || 0, 0, 1000);
+      const Sv = clamp(+Sn.value || +S.value || 0, 0, 1000);
+
+      syncPair(H, Hn, Hv);
+      syncPair(hf, hfn, hfv);
+      syncPair(d, dn, dv);
+      syncPair(S, Sn, Sv);
+
+      saveAll({[keys.C]:Cv, [keys.Hub]:Hubv, [keys.H]:Hv, [keys.hf]:hfv, [keys.d]:dv, [keys.S]:Sv});
+
+      const Lmaxv = Cv - Hv - hfv;
+      const Lminv = Math.max(0, Cv - Hubv - Hv + dv);
+      const LsafeMax = Sv / 3; // 2/3-Regel
+      const safeUpper = Math.min(Lmaxv, LsafeMax);
+
+      const fmt = v => (isFinite(v) ? v.toFixed(1).replace(/\.0$/,'') : '–');
+      Lmax.textContent = fmt(Lmaxv);
+      Lmin.textContent = fmt(Lminv);
+      rangeChip.textContent = `Werkzeug (Maschine): ${fmt(Lminv)} – ${fmt(Lmaxv)} mm`;
+      ruleChip.textContent = `2/3‑Regel: L ≤ ${fmt(LsafeMax)} mm (S/3)`;
+
+      let msg = [];
+      const invalidMachine = (Lminv > Lmaxv) || (Lmaxv < 0);
+      const violatesRule = (Lminv > LsafeMax);
+      if (invalidMachine) {
+        if (Lmaxv < 0) msg.push('⚠︎ Lmax < 0 → kein Freiraum');
+        if (Lminv > Lmaxv) msg.push('❌ Lmin > Lmax → nicht fahrbar (Maschinenlimit)');
+      } else if (violatesRule) {
+        msg.push('❌ 2/3‑Regel verletzt → zu wenig Einspannlänge');
+        msg.push(`Erlaubter Bereich (Regel): L ≤ ${fmt(LsafeMax)} mm`);
+      } else {
+        msg.push(`✅ Sicherer Bereich: ${fmt(Lminv)} – ${fmt(safeUpper)} mm`);
+      }
+      notes.innerHTML = msg.join(' &nbsp;•&nbsp; ');
+
+      const yTable = 200, topPad = 15, usable = yTable - topPad;
+      const ref = Math.max(Cv, Hubv, Hv + hfv + dv) + 5;
+      const pxPerMm = usable / Math.max(ref, 1);
+      const yOf = mm => yTable - mm * pxPerMm;
+
+      const ySpindle = yOf(Cv);
+      setLine('spindle', 50, ySpindle, 90, ySpindle);
+      document.getElementById('spindleIcon').setAttribute('cy', ySpindle);
+
+      const yWpTop = yOf(Hv);
+      setRect('wp', 140, yWpTop, 90, yTable - yWpTop);
+
+      const yHfTop = yOf(Hv + hfv);
+      setRect('hfzone', 140, yHfTop, 90, Math.max(0, yWpTop - yHfTop));
+
+      const yDepth = yOf(Math.max(Hv - dv, 0));
+      setLine('depth', 235, yDepth, 265, yDepth);
+      setText('td', 270, yDepth + 4);
+
+      setLine('CLine', 100, yTable, 100, ySpindle);
+      setText('tC', 106, (yTable + ySpindle)/2 + 4);
+
+      const yHubTop = yOf(Hubv);
+      setLine('hubLine', 80, yTable, 80, yHubTop);
+      setText('tHub', 86, (yTable + yHubTop)/2 + 4);
+
+      const yLmax = yOf(Math.max(Hv + hfv, 0));
+      setLine('LmaxLine', 320, yTable, 320, yLmax);
+      setText('tLmax', 326, (yTable + yLmax)/2 + 4);
+
+      const yLminStart = yOf(Math.max(Hv - dv, 0));
+      const yLminEnd = yOf(Math.max(Hv - dv, 0) + Math.max(Lminv,0));
+      setLine('LminLine', 330, yLminStart, 330, yLminEnd);
+      setText('tLmin', 336, (yLminStart + yLminEnd)/2 + 4);
+
+      const invalid = invalidMachine || violatesRule;
+      document.getElementById('warnX').style.display = invalid ? 'block' : 'none';
+      const Ls = ['LmaxLine','LminLine','hubLine','CLine'];
+      Ls.forEach(id => document.getElementById(id).setAttribute('class', (id==='LminLine'?'dim2':'dim') + (invalid?' dimBad':'')));
+    }
+
+    function setLine(id,x1,y1,x2,y2){ const el=document.getElementById(id); el.setAttribute('x1',x1); el.setAttribute('y1',y1); el.setAttribute('x2',x2); el.setAttribute('y2',y2); }
+    function setRect(id,x,y,w,h){ const el=document.getElementById(id); el.setAttribute('x',x); el.setAttribute('y',y); el.setAttribute('width',w); el.setAttribute('height',Math.max(0,h)); }
+    function setText(id,x,y){ const el=document.getElementById(id); el.setAttribute('x',x); el.setAttribute('y',y); }
+
+    (function init(){
+      const vals = {
+        [keys.C]: loadNum(keys.C, defaults.C),
+        [keys.Hub]: loadNum(keys.Hub, defaults.Hub),
+        [keys.H]: loadNum(keys.H, defaults.H),
+        [keys.hf]: loadNum(keys.hf, defaults.hf),
+        [keys.d]: loadNum(keys.d, defaults.d),
+        [keys.S]: loadNum(keys.S, defaults.S)
+      };
+      C.value = vals[keys.C]; hub.value = vals[keys.Hub];
+      H.value = vals[keys.H]; Hn.value = vals[keys.H];
+      hf.value = vals[keys.hf]; hfn.value = vals[keys.hf];
+      d.value = vals[keys.d]; dn.value = vals[keys.d];
+      S.value = vals[keys.S]; Sn.value = vals[keys.S];
+      recalc();
+    })();
+
+    [C, hub, H, Hn, hf, hfn, d, dn, S, Sn].forEach(el => {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+  </script>
+</body>
+</html>
