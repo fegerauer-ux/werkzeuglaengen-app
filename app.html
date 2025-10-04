@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Werkzeuglängen Rechner – v0.5.4 (statisch)</title>
+  <meta name="theme-color" content="#0b0d10">
+  <style>
+    :root{ --bg:#0b0d10; --panel:#12161b; --muted:#96a1b2; --text:#e9eef5; --accent:#6ee7ff; --accent2:#9bffd1; --err:#ff5b5b;
+      --radius:16px; --gap:14px; --shadow:0 6px 24px rgba(0,0,0,.35); }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial; background:#0e1217; color:#e9eef5;}
+    .wrap{max-width:900px; margin:0 auto; padding:20px;}
+    header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px}
+    h1{font-size:1.25rem; margin:0}
+    .badge{font-size:.8rem; color:var(--bg); background:linear-gradient(90deg,var(--accent),var(--accent2)); padding:4px 10px; border-radius:999px;}
+    .grid{display:grid; grid-template-columns:1fr; gap:var(--gap)}
+    @media(min-width:740px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:linear-gradient(180deg,#141a21,#0f1318); border:1px solid #1f2630; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow)}
+    .row{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin:10px 0}
+    label{font-size:.95rem; color:#d2dae6}
+    input[type='number']{width:120px; padding:8px 10px; border-radius:10px; background:#0d1116; color:#e9eef5; border:1px solid #222a35}
+    input[type='range']{width:100%}
+    .unit{opacity:.75; font-size:.9rem}
+    .sub{font-size:.86rem; color:#96a1b2}
+    .out{display:flex; gap:12px; align-items:baseline; flex-wrap:wrap}
+    .out strong{font-size:1.6rem}
+    .chip{border:1px solid #273142; border-radius:999px; padding:6px 10px; font-size:.85rem; color:#c7d2e3}
+    .ok{color:var(--accent2)} .err{color:var(--err)} .muted{color:var(--muted)}
+    .footer{margin-top:16px; font-size:.85rem; color:var(--muted)}
+    .ill-wrap{position:relative; height:260px; background:#0e1319; border:1px solid #1e2631; border-radius:12px; overflow:hidden}
+    .ill{position:absolute; inset:0; padding:16px}
+    .ill .tbl{position:absolute; left:16px; right:16px; bottom:20px; height:2px; background:#263140}
+    .ill .label{position:absolute; font-size:12px; color:#cfe6ff}
+    .ill .dim{position:absolute; height:2px; background:#6ee7ff}
+    .ill .dim2{position:absolute; height:2px; background:#9bffd1}
+    .ill .block{position:absolute; width:180px; left:calc(50% - 90px); bottom:22px; height:72px; background:#1b2430; border:1px solid #2b3a4a}
+    .ill .hatch{position:absolute; width:180px; left:calc(50% - 90px); bottom:96px; height:46px; border:1px dashed #44556b}
+    .ill img.icon{position:absolute; width:56px; height:auto; left:34px; top:40px; opacity:.95}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Werkzeuglängen Rechner</h1>
+      <span class="badge">v0.5.4</span>
+    </header>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="inputsTitle">
+        <h2 id="inputsTitle" style="margin:0 0 8px 0; font-size:1.1rem;">Eingaben</h2>
+        <p class="sub">Werte werden automatisch gespeichert.</p>
+
+        <div class="row">
+          <label for="C">Freiraum <span class="muted">C</span></label>
+          <div><input id="C" type="number" min="0" max="400" step="1" inputmode="decimal"> <span class="unit">mm</span></div>
+        </div>
+        <div class="row">
+          <label for="hub">Hub Z <span class="muted">(Hub)</span></label>
+          <div><input id="hub" type="number" min="0" max="400" step="1" inputmode="decimal"> <span class="unit">mm</span></div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #1e2631; margin:10px 0">
+
+        <div class="row">
+          <label for="H">Werkstückhöhe <span class="muted">H</span></label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="H" type="range" min="0" max="240" step="0.5" value="35" style="flex:1"> 
+            <input id="Hn" type="number" min="0" max="400" step="0.5" value="35" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="hf">Freifahrhöhe <span class="muted">h<sub>f</sub></span></label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="hf" type="range" min="0" max="240" step="0.5" value="5" style="flex:1">
+            <input id="hfn" type="number" min="0" max="400" step="0.5" value="5" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="d">Frästiefe <span class="muted">d</span></label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="d" type="range" min="0" max="240" step="0.5" value="2" style="flex:1">
+            <input id="dn" type="number" min="0" max="400" step="0.5" value="2" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #1e2631; margin:10px 0">
+
+        <div class="row">
+          <label for="S">Schaftlänge <span class="muted">S</span> <span class="sub">(2/3‑Regel)</span></label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="S" type="range" min="0" max="240" step="0.5" value="30" style="flex:1">
+            <input id="Sn" type="number" min="0" max="400" step="0.5" value="30" style="width:90px" inputmode="decimal">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="outTitle">
+        <h2 id="outTitle" style="margin:0 0 8px 0; font-size:1.1rem;">Ergebnisse</h2>
+        <div class="out" style="margin-bottom:10px">
+          <div><div class="muted">L<sub>max</sub></div><strong id="Lmax">–</strong> <span class="unit">mm</span></div>
+          <div><div class="muted">L<sub>min</sub></div><strong id="Lmin">–</strong> <span class="unit">mm</span></div>
+        </div>
+        <div class="chip" id="rangeChip">Werkzeug (Maschine): – bis – mm</div>
+        <div class="chip" id="ruleChip" style="margin-top:8px">2/3‑Regel: L ≤ – mm (S/3)</div>
+        <div class="chip" id="supportChip" style="margin-top:8px; display:none">Unterbau: B ≥ – mm (max. – mm)</div>
+        <div id="notes" class="sub" style="margin-top:10px"></div>
+        <hr style="border:none; border-top:1px solid #1e2631; margin:12px 0">
+        <div class="sub">Formeln: L<sub>max</sub> = C − H − h<sub>f</sub> • L<sub>min</sub> = max(0, C − Hub − H + d) • 2/3‑Regel: L ≤ S/3 • Unterbau: B<sub>min</sub>=max(0, C−Hub−H+d−S/3), B<sub>max</sub>=C−H−h<sub>f</sub></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:14px">
+      <h3 style="margin:0 0 8px 0; font-size:1rem;">Symbolische Skizze (statisch)</h3>
+      <div class="ill-wrap">
+        <div class="ill">
+          <div class="tbl"></div>
+          <div class="block"></div>
+          <div class="hatch"></div>
+          <img class="icon" src="spindle-icon.svg" alt="Spindel">
+          <div class="label" style="left:20px; bottom:4px;">Tisch</div>
+          <div class="label" style="left:26px; top:34px;">Spindel</div>
+          <div class="dim"  style="left:120px; top:62px; width:110px;"></div><div class="label" style="left:236px; top:54px;">Lmax</div>
+          <div class="dim2" style="left:120px; top:82px; width:70px;"></div><div class="label" style="left:196px; top:74px;">Lmin</div>
+          <div class="dim2" style="left:420px; top:154px; width:40px;"></div><div class="label" style="left:466px; top:146px;">d</div>
+          <div class="label" style="left:26px; top:86px;">C</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <div class="footer">Made for mobile • v0.5.4</div>
+    </section>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const C = $("C"), hub = $("hub");
+    const H = $("H"), Hn = $("Hn");
+    const hf = $("hf"), hfn = $("hfn");
+    const d = $("d"), dn = $("dn");
+    const S = $("S"), Sn = $("Sn");
+    const Lmax = $("Lmax"), Lmin = $("Lmin"), notes = $("notes"), rangeChip = $("rangeChip"), ruleChip = $("ruleChip"), supportChip = $("supportChip");
+
+    const keys = {C:'wl_C', Hub:'wl_Hub', H:'wl_H', hf:'wl_hf', d:'wl_d', S:'wl_S'};
+    const defaults = {C:60, Hub:20, H:35, hf:5, d:2, S:30};
+
+    const lastSrc = { H:'num', hf:'num', d:'num', S:'num' };
+    function pickPair(rangeEl, numEl, key){ return (lastSrc[key]==='range' ? (+rangeEl.value||0) : (+numEl.value||0)); }
+    function syncPair(rangeEl, numEl, val){ rangeEl.value = val; numEl.value = val; }
+
+    function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+    function loadNum(key, def){ const x = localStorage.getItem(key); const n = x===null?NaN:+x; return isFinite(n) ? n : def; }
+    function saveAll(vals){ for(const [k,v] of Object.entries(vals)) localStorage.setItem(k, v); }
+
+    function fmt(v){ return isFinite(v) ? (+v).toFixed(1).replace(/\.0$/,'') : '–'; }
+
+    function recalc(){
+      const Cv = +C.value || 0;
+      const Hubv = +hub.value || 0;
+      const Hv = clamp(pickPair(H, Hn, 'H'), 0, 1000);
+      const hfv = clamp(pickPair(hf, hfn, 'hf'), 0, 1000);
+      const dv = clamp(pickPair(d, dn, 'd'), 0, 1000);
+      const Sv = clamp(pickPair(S, Sn, 'S'), 0, 1000);
+
+      syncPair(H, Hn, Hv);
+      syncPair(hf, hfn, hfv);
+      syncPair(d, dn, dv);
+      syncPair(S, Sn, Sv);
+
+      saveAll({[keys.C]:Cv, [keys.Hub]:Hubv, [keys.H]:Hv, [keys.hf]:hfv, [keys.d]:dv, [keys.S]:Sv});
+
+      const Lmaxv = Cv - Hv - hfv;
+      const Lminv = Math.max(0, Cv - Hubv - Hv + dv);
+      const LsafeMax = Sv / 3;
+      const safeUpper = Math.min(Lmaxv, LsafeMax);
+
+      const Bmin = Math.max(0, Cv - Hubv - Hv + dv - LsafeMax);
+      const Bmax = Math.max(0, Cv - Hv - hfv);
+      const showB = (Lminv > LsafeMax) && (Bmin > 0);
+
+      Lmax.textContent = fmt(Lmaxv);
+      Lmin.textContent = fmt(Lminv);
+      rangeChip.textContent = `Werkzeug (Maschine): ${fmt(Lminv)} – ${fmt(Lmaxv)} mm`;
+      ruleChip.textContent = `2/3‑Regel: L ≤ ${fmt(LsafeMax)} mm (S/3)`;
+      if (showB){
+        supportChip.style.display = 'inline-block';
+        supportChip.textContent = `Unterbau: B ≥ ${fmt(Bmin)} mm (max. ${fmt(Bmax)} mm)`;
+      } else {
+        supportChip.style.display = 'none';
+      }
+
+      let msg = [];
+      const invalidMachine = (Lminv > Lmaxv) || (Lmaxv < 0);
+      const violatesRule = (Lminv > LsafeMax);
+      if (invalidMachine) {
+        if (Lmaxv < 0) msg.push('⚠︎ Lmax < 0 → kein Freiraum');
+        if (Lminv > Lmaxv) msg.push('❌ Lmin > Lmax → nicht fahrbar (Maschinenlimit)');
+      } else if (violatesRule) {
+        msg.push('❌ 2/3‑Regel verletzt → zu wenig Einspannlänge');
+        msg.push(`Vorschlag: Unterbau B ≥ ${fmt(Bmin)} mm (max ${fmt(Bmax)} mm)`);
+      } else {
+        msg.push(`✅ Sicherer Bereich: ${fmt(Lminv)} – ${fmt(safeUpper)} mm`);
+      }
+      notes.innerHTML = msg.join(' &nbsp;•&nbsp; ');
+    }
+
+    (function init(){
+      const vals = {
+        [keys.C]: loadNum(keys.C, defaults.C),
+        [keys.Hub]: loadNum(keys.Hub, defaults.Hub),
+        [keys.H]: loadNum(keys.H, defaults.H),
+        [keys.hf]: loadNum(keys.hf, defaults.hf),
+        [keys.d]: loadNum(keys.d, defaults.d),
+        [keys.S]: loadNum(keys.S, defaults.S)
+      };
+      C.value = vals[keys.C]; hub.value = vals[keys.Hub];
+      H.value = vals[keys.H]; Hn.value = vals[keys.H];
+      hf.value = vals[keys.hf]; hfn.value = vals[keys.hf];
+      d.value = vals[keys.d]; dn.value = vals[keys.d];
+      S.value = vals[keys.S]; Sn.value = vals[keys.S];
+      recalc();
+    })();
+
+    [C, hub, H, Hn, hf, hfn, d, dn, S, Sn].forEach(el => {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+    H.addEventListener('input', ()=>{ lastSrc.H='range'; });
+    Hn.addEventListener('input', ()=>{ lastSrc.H='num'; });
+    hf.addEventListener('input', ()=>{ lastSrc.hf='range'; });
+    hfn.addEventListener('input', ()=>{ lastSrc.hf='num'; });
+    d.addEventListener('input', ()=>{ lastSrc.d='range'; });
+    dn.addEventListener('input', ()=>{ lastSrc.d='num'; });
+    S.addEventListener('input', ()=>{ lastSrc.S='range'; });
+    Sn.addEventListener('input', ()=>{ lastSrc.S='num'; });
+  </script>
+</body>
+</html>
