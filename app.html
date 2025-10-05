@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Werkzeuglängen Rechner</title>
+
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #0d0d0d;
+      color: #ddd;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffff;
+    }
+
+    /* Modal-Stil */
+    #hilfeModal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    #hilfeModal .modal-content {
+      background-color: #111;
+      color: #ddd;
+      max-width: 900px;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #hilfeModal img {
+      display: block;
+      margin: 0 auto;
+      max-width: 85%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+    }
+
+    #hilfeModal button {
+      margin-top: 15px;
+      padding: 8px 14px;
+      background-color: #00ffff33;
+      border: 1px solid #00ffff66;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #hilfeModal button:hover {
+      background-color: #00ffff55;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      color: #777;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Werkzeuglängen Rechner</h1>
+
+    <p style="text-align:center;">
+      <button onclick="openModal()">Grafik anzeigen (F1)</button>
+    </p>
+
+    <div id="hilfeModal">
+      <div class="modal-content">
+        <h3>Grafik – Maßdefinitionen</h3>
+        <img id="hilfe-grafik" src="V0.1.png" alt="Maßdefinitionen">
+        <p style="margin-top:10px; font-size:0.9rem; color:#aaa;">
+          Maßdefinitionen siehe Grafik: <strong>C</strong> (Freiraum), 
+          <strong>Hub Z</strong> (Maschinenhub), 
+          <strong>H</strong> (Werkstückhöhe), 
+          <strong>h<sub>f</sub></strong> (Freifahrhöhe), 
+          <strong>d</strong> (Frästiefe), 
+          <strong>S</strong> (Schaftlänge), 
+          <strong>B</strong> (Unterbau)
+        </p>
+        <button onclick="closeModal()">Schließen (Esc)</button>
+      </div>
+    </div>
+
+    <!-- Hier folgen deine bisherigen Rechen-Elemente / UI -->
+  </div>
+
+  <footer>
+    Tipp: <strong>F1</strong> öffnet/schließt die Grafik schnell.
+  </footer>
+
+  <script>
+    const modal = document.getElementById("hilfeModal");
+
+    function openModal() {
+      modal.style.display = "block";
+    }
+
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    // Tastenkürzel F1 / Esc
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "F1") {
+        e.preventDefault();
+        modal.style.display = modal.style.display === "block" ? "none" : "block";
+      } else if (e.key === "Escape") {
+        modal.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
