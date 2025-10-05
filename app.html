@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Werkzeuglängen Rechner – v0.6.7</title>
+  <style>
+    :root{ --bg:#0e1217; --panel:#141a21; --stroke:#1f2630; --text:#e9eef5; --muted:#a8b3c4; --chip:#273142; --accent:#00FFFF; --ok:#29d39a; --bad:#ff6b6b; }
+    *{box-sizing:border-box}
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial; background:var(--bg); color:var(--text); }
+    .wrap{ max-width:980px; margin:0 auto; padding:20px }
+    header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px }
+    h1{ font-size:1.25rem; margin:0; color:var(--accent); }
+    .badge{ font-size:.8rem; background:var(--accent); color:#00161a; padding:4px 10px; border-radius:999px }
+    .grid{ display:grid; gap:14px; grid-template-columns:1fr; }
+    @media(min-width:780px){ .grid{ grid-template-columns:1fr 1fr } }
+    .card{ background:linear-gradient(180deg,var(--panel),#0f1318); border:1px solid var(--stroke); border-radius:14px; padding:14px }
+    .row{ display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin:10px 0 }
+    input[type="number"]{ width:110px; padding:8px 10px; border-radius:10px; background:#0c1116; color:var(--text); border:1px solid #222a35 }
+    input[type="range"]{ width:100% }
+    .unit{ opacity:.75 }
+    .sub{ color:var(--muted); font-size:.9rem }
+    .out{ display:flex; gap:16px; flex-wrap:wrap; align-items:baseline; margin:8px 0 }
+    .out strong{ font-size:1.6rem }
+    .chip{ border:1px solid var(--chip); border-radius:999px; padding:6px 10px; font-size:.9rem; color:#cfe0f2 }
+    .helpbar{ display:flex; justify-content:flex-end; margin-top:10px }
+    .btn{ background:#0f1620; color:var(--text); border:1px solid var(--chip); padding:8px 12px; border-radius:10px; cursor:pointer }
+    .btn:hover{ filter:brightness(1.1) }
+    .ok{ color:var(--ok) } .bad{ color:var(--bad) }
+
+    /* Modal */
+    .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.72); padding:20px; z-index:50 }
+    .modal[aria-hidden="false"]{ display:flex }
+    .modal-card{ background:#0e1217; border:1px solid var(--chip); border-radius:14px; width:min(1100px,96vw); max-height:92vh; display:flex; flex-direction:column }
+    .modal-head{ display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #1e2631 }
+    .modal-body{ padding:10px; overflow:auto; text-align:center }
+    /* Bild sauber skalieren */
+    #hilfe-grafik{ display:block; margin:0 auto; max-width:85%; height:auto; border-radius:8px; box-shadow:0 0 12px rgba(0,255,255,.3); }
+    .legend{ margin-top:10px; color:#cfe0f2; font-size:.95rem }
+    .legend small{ color:var(--muted) }
+    .footer{ margin-top:12px; color:var(--muted); font-size:.9rem }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Werkzeuglängen Rechner</h1>
+      <span class="badge">v0.6.7</span>
+    </header>
+
+    <div class="grid">
+      <!-- Eingaben -->
+      <section class="card" aria-labelledby="inTitle">
+        <h2 id="inTitle" style="margin:0 0 6px 0; font-size:1.05rem">Eingaben</h2>
+        <p class="sub">Werte werden automatisch gespeichert.</p>
+
+        <div class="row">
+          <label for="C">Freiraum C</label>
+          <div><input id="C" type="number" min="0" max="400" step="1"> <span class="unit">mm</span></div>
+        </div>
+        <div class="row">
+          <label for="Hub">Hub Z (Hub)</label>
+          <div><input id="Hub" type="number" min="0" max="400" step="1"> <span class="unit">mm</span></div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #1e2631; margin:8px 0">
+
+        <div class="row">
+          <label for="H">Werkstückhöhe H</label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="H" type="range" min="0" max="240" step="0.5" value="35" style="flex:1">
+            <input id="Hn" type="number" min="0" max="400" step="0.5" value="35" style="width:90px">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="hf">Freifahrhöhe h<sub>f</sub></label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="hf" type="range" min="0" max="240" step="0.5" value="5" style="flex:1">
+            <input id="hfn" type="number" min="0" max="400" step="0.5" value="5" style="width:90px">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+        <div class="row">
+          <label for="d">Frästiefe d</label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="d" type="range" min="0" max="240" step="0.5" value="2" style="flex:1">
+            <input id="dn" type="number" min="0" max="400" step="0.5" value="2" style="width:90px">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #1e2631; margin:8px 0">
+
+        <div class="row">
+          <label for="S">Schaftlänge S <span class="sub">(2/3-Regel)</span></label>
+          <div style="display:flex; gap:10px; align-items:center">
+            <input id="S" type="range" min="0" max="240" step="0.5" value="30" style="flex:1">
+            <input id="Sn" type="number" min="0" max="400" step="0.5" value="30" style="width:90px">
+            <span class="unit">mm</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ergebnisse -->
+      <section class="card" aria-labelledby="outTitle">
+        <h2 id="outTitle" style="margin:0 0 6px 0; font-size:1.05rem">Ergebnisse</h2>
+        <div class="out">
+          <div><div class="sub">L<sub>max</sub></div><strong id="Lmax">–</strong> <span class="unit">mm</span></div>
+          <div><div class="sub">L<sub>min</sub></div><strong id="Lmin">–</strong> <span class="unit">mm</span></div>
+        </div>
+        <div class="chip" id="rangeChip">Werkzeug (Maschine): – bis – mm</div>
+        <div class="chip" id="ruleChip" style="margin-top:8px">2/3-Regel: L ≤ – mm (S/3)</div>
+        <div class="chip" id="supportChip" style="margin-top:8px; display:none">Unterbau: B ≥ – mm (max. – mm)</div>
+        <div id="notes" class="sub" style="margin-top:8px"></div>
+
+        <div class="helpbar">
+          <button id="openHelp" class="btn" type="button">🔍 Grafik anzeigen (F1)</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:12px">
+      <div class="sub">
+        Formeln: L<sub>max</sub>=C−H−h<sub>f</sub> • L<sub>min</sub>=max(0, C−Hub−H+d) • 2/3-Regel: L ≤ S/3 •
+        Unterbau: B<sub>min</sub>=max(0, C−Hub−H+d−S/3), B<sub>max</sub>=C−H−h<sub>f</sub>
+      </div>
+      <div class="footer">Made for mobile • v0.6.7</div>
+    </section>
+  </div>
+
+  <!-- Hilfe-Modal (lädt dein PNG) -->
+  <div id="helpModal" class="modal" aria-hidden="true" role="dialog" aria-label="Grafik – Maßdefinitionen">
+    <div class="modal-card">
+      <div class="modal-head">
+        <strong>Grafik – Maßdefinitionen</strong>
+        <button id="closeHelp" class="btn" type="button">Schließen (Esc)</button>
+      </div>
+      <div class="modal-body">
+        <img id="hilfe-grafik" src="./V0.1.png?v=2" alt="Maßdefinitionen (C, Z, H, hf, d, S, B)" />
+        <div class="legend">
+          Maßdefinitionen siehe Grafik: <strong>C</strong> (Freiraum), <strong>Hub Z</strong> (Maschinenhub), <strong>H</strong> (Werkstückhöhe),
+          <strong>h<sub>f</sub></strong> (Freifahrhöhe), <strong>d</strong> (Frästiefe), <strong>S</strong> (Schaftlänge), <strong>B</strong> (Unterbau).
+          <br><small>Tipp: <kbd>F1</kbd> öffnet/schließt die Grafik schnell.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const C=$("C"), Hub=$("Hub");
+    const H=$("H"), Hn=$("Hn");
+    const hf=$("hf"), hfn=$("hfn");
+    const d=$("d"), dn=$("dn");
+    const S=$("S"), Sn=$("Sn");
+    const LmaxEl=$("Lmax"), LminEl=$("Lmin");
+    const rangeChip=$("rangeChip"), ruleChip=$("ruleChip"), supportChip=$("supportChip"), notes=$("notes");
+
+    const keys = {C:'wl_C', Hub:'wl_Hub', H:'wl_H', hf:'wl_hf', d:'wl_d', S:'wl_S'};
+    const defaults = {C:60, Hub:20, H:35, hf:5, d:2, S:30};
+    const last = {H:'num', hf:'num', d:'num', S:'num'};
+    const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+    const fmt=v=>isFinite(v)?(+v).toFixed(1).replace(/\.0$/,''):'–';
+    const load=(k,def)=>{ const x=localStorage.getItem(k); const n=x===null?NaN:+x; return isFinite(n)?n:def; };
+    const saveAll=o=>{ for(const[k,v] of Object.entries(o)) localStorage.setItem(k,v); };
+    const pick=(r,n,k)=> last[k]==='range' ? (+r.value||0) : (+n.value||0);
+    const sync=(r,n,v)=>{ r.value=v; n.value=v; };
+
+    function recalc(){
+      const Cv=+C.value||0, Hubv=+Hub.value||0;
+      const Hv=clamp(pick(H,Hn,'H'),0,1000);    sync(H,Hn,Hv);
+      const hfv=clamp(pick(hf,hfn,'hf'),0,1000);sync(hf,hfn,hfv);
+      const dv=clamp(pick(d,dn,'d'),0,1000);    sync(d,dn,dv);
+      const Sv=clamp(pick(S,Sn,'S'),0,1000);    sync(S,Sn,Sv);
+      saveAll({[keys.C]:Cv,[keys.Hub]:Hubv,[keys.H]:Hv,[keys.hf]:hfv,[keys.d]:dv,[keys.S]:Sv});
+
+      const Lmax = Cv - Hv - hfv;
+      const Lmin = Math.max(0, Cv - Hubv - Hv + dv);
+      const Lsafe = Sv/3;
+      const safeUpper = Math.min(Lmax, Lsafe);
+
+      const Bmin = Math.max(0, Cv - Hubv - Hv + dv - Lsafe);
+      const Bmax = Math.max(0, Cv - Hv - hfv);
+      const needB = (Lmin > Lsafe) && (Bmin > 0);
+
+      LmaxEl.textContent = fmt(Lmax);
+      LminEl.textContent = fmt(Lmin);
+      rangeChip.textContent = `Werkzeug (Maschine): ${fmt(Lmin)} – ${fmt(Lmax)} mm`;
+      ruleChip.textContent  = `2/3-Regel: L ≤ ${fmt(Lsafe)} mm (S/3)`;
+      if(needB){ supportChip.style.display='inline-block'; supportChip.textContent=`Unterbau: B ≥ ${fmt(Bmin)} mm (max. ${fmt(Bmax)} mm)`; }
+      else { supportChip.style.display='none'; }
+
+      let m=[];
+      const invalid = (Lmin > Lmax) || (Lmax < 0);
+      const violates = (Lmin > Lsafe);
+      if(invalid){ m.push('<span class="bad">❌ Nicht fahrbar (Maschinenlimit)</span>'); }
+      else if(violates){ m.push('<span class="bad">❌ 2/3-Regel verletzt – zu wenig Einspannlänge</span>'); m.push(`Vorschlag: Unterbau B ≥ ${fmt(Bmin)} mm`); }
+      else { m.push(`<span class="ok">✅ Sicherer Bereich: ${fmt(Lmin)} – ${fmt(safeUpper)} mm</span>`); }
+      notes.innerHTML = m.join(' &nbsp;•&nbsp; ');
+    }
+
+    // Init + Events
+    (function(){
+      C.value  = load(keys.C, defaults.C);
+      Hub.value= load(keys.Hub, defaults.Hub);
+      const Hv = load(keys.H, defaults.H);  H.value=Hn.value=Hv;
+      const hfv= load(keys.hf, defaults.hf);hf.value=hfn.value=hfv;
+      const dv = load(keys.d, defaults.d);  d.value=dn.value=dv;
+      const Sv = load(keys.S, defaults.S);  S.value=Sn.value=Sv;
+      recalc();
+    })();
+
+    [C,Hub,H,Hn,hf,hfn,d,dn,S,Sn].forEach(el=>{ el.addEventListener('input',recalc); el.addEventListener('change',recalc); });
+    H.addEventListener('input',()=>last.H='range');   Hn.addEventListener('input',()=>last.H='num');
+    hf.addEventListener('input',()=>last.hf='range'); hfn.addEventListener('input',()=>last.hf='num');
+    d.addEventListener('input',()=>last.d='range');   dn.addEventListener('input',()=>last.d='num');
+    S.addEventListener('input',()=>last.S='range');   Sn.addEventListener('input',()=>last.S='num');
+
+    // Modal
+    const modal=document.getElementById("helpModal");
+    document.getElementById("openHelp").onclick=()=>modal.setAttribute('aria-hidden','false');
+    document.getElementById("closeHelp").onclick=()=>modal.setAttribute('aria-hidden','true');
+    modal.addEventListener('click',e=>{ if(e.target===modal) modal.setAttribute('aria-hidden','true'); });
+    window.addEventListener('keydown',e=>{ if(e.key==='Escape') modal.setAttribute('aria-hidden','true'); if(e.key==='F1'){ e.preventDefault(); modal.setAttribute('aria-hidden', modal.getAttribute('aria-hidden')==='false'?'true':'false'); } });
+  </script>
+</body>
+</html>
