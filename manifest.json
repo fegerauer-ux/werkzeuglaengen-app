@@ -3,7 +3,7 @@
   "short_name": "Werkzeuglängen",
   "description": "Berechnet Lmin/Lmax, prüft 2/3-Regel, schlägt Unterbau vor.",
   "lang": "de-DE",
-  "start_url": "app.html?source=pwa",
+  "start_url": "app.html?v=73",   // <— NEU
   "scope": "./",
   "display": "standalone",
   "background_color": "#0e1217",
