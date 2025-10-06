@@ -1,14 +1,15 @@
 {
   "name": "Werkzeuglängen Rechner",
   "short_name": "Werkzeuglängen",
-  "id": "/werkzeuglaengen-app/app.html",
-  "start_url": "/werkzeuglaengen-app/app.html",
-  "scope": "/werkzeuglaengen-app/",
+  "description": "Berechnet Lmin/Lmax, prüft 2/3-Regel, schlägt Unterbau vor.",
+  "lang": "de-DE",
+  "start_url": "app.html?source=pwa",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0b0d10",
-  "theme_color": "#0b0d10",
+  "background_color": "#0e1217",
+  "theme_color": "#0e1217",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
